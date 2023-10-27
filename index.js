@@ -132,6 +132,32 @@
 // });
 
 //full join
+// const express = require('express');
+// const app = express();
+// const pool = require('./conexao');
+
+// app.use(express.json());
+
+// app.get('/', async (req, res) => {
+//   try {
+//     const query = `    
+//     select e.id as empresaId, f.id as filialId, e.nome, f.pais from empresas e full join filiais f on e.id = f.empresa_id ;
+//     `;
+
+//     const resultado = await pool.query(query);
+//     return res.json(resultado.rows);
+//   } catch (error) {
+//     console.log(error.message);
+//   }
+// });
+
+// app.listen(3000, () => {
+//   console.log("Sua Api está rodando na porta 3000");
+// });
+
+
+//paginação
+
 const express = require('express');
 const app = express();
 const pool = require('./conexao');
@@ -139,13 +165,25 @@ const pool = require('./conexao');
 app.use(express.json());
 
 app.get('/', async (req, res) => {
+  const { pagina, porPagina } = req.query;
   try {
     const query = `    
-    select e.id as empresaId, f.id as filialId, e.nome, f.pais from empresas e full join filiais f on e.id = f.empresa_id ;
+    SELECT * FROM pessoas ORDER BY id 
+    ASC LIMIT $1 OFFSET $2;
     `;
 
-    const resultado = await pool.query(query);
-    return res.json(resultado.rows);
+    const {rowCount} = await pool.query(`select * from pessoas`)
+
+    const offset = pagina === 1 ? 0 : (pagina - 1) * porPagina
+
+    const resultado = await pool.query(query, [porPagina, offset]);
+    const result = {
+      pagina,
+      porPagina,
+      total: rowCount,
+      registros: resultado.rows,
+    }
+    return res.json(result);
   } catch (error) {
     console.log(error.message);
   }
@@ -154,9 +192,6 @@ app.get('/', async (req, res) => {
 app.listen(3000, () => {
   console.log("Sua Api está rodando na porta 3000");
 });
-
-
-
 
 
 
