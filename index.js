@@ -50,19 +50,44 @@
 // });
 
 //fazendo update
+// const express = require('express');
+// const app = express();
+// const pool = require('./conexao');
+
+// app.use(express.json());
+
+// app.get('/:id', async (req, res) => {
+//   const {id} = req.params;
+//   try {
+//     const query = `update empresas set site = $1 where id = $2`;
+//     const params = ['ww.cackewalk.com', 1];
+
+//     const resultado = await pool.query(query, params);
+//     return res.json(resultado.rows);
+//   } catch (error) {
+//     console.log(error.message);
+//   }
+// });
+
+// app.listen(3000, () => {
+//   console.log("Sua Api está rodando na porta 3000");
+// });
+
 const express = require('express');
 const app = express();
 const pool = require('./conexao');
 
 app.use(express.json());
 
-app.get('/:id', async (req, res) => {
-  const {id} = req.params;
+app.get('/', async (req, res) => {
   try {
-    const query = `update empresas set site = $1 where id = $2`;
-    const params = ['ww.cackewalk.com', 1];
+    const query = `select e.id as empresaId, f.id as filialId, e.nome, f.pais, p.nome as funcionario 
+    from empresas e 
+    join filiais f on e.id = f.empresa_id 
+    join pessoas p on e.id = p.empresa_id 
+    ;`;
 
-    const resultado = await pool.query(query, params);
+    const resultado = await pool.query(query);
     return res.json(resultado.rows);
   } catch (error) {
     console.log(error.message);
